@@ -12,15 +12,14 @@
 ## 📸 Preview / Visualização
 
 [Dashboard Preview]
-<<img width="1138" height="470" alt="image" src="https://github.com/user-attachments/assets/51d5e9a9-af78-463f-b865-eba9fcb0739b" />
+<img width="1138" height="470" alt="image" src="https://github.com/user-attachments/assets/51d5e9a9-af78-463f-b865-eba9fcb0739b" />
 *(Screenshot of the generated HTML report / Captura de tela do relatório gerado)*
 
 ## 💡 UX & Educational Mode / Modo Educativo
 
 [Tooltips Demo]
-*(Interactive tooltips in action / Tooltips interativos em ação)*
 <img width="1265" height="444" alt="image" src="https://github.com/user-attachments/assets/7e81af27-aefb-4ebb-9c83-2222ce0723e7" />
-
+*(Interactive tooltips in action / Tooltips interativos em ação)*
 
 ---
 ## 🇧🇷 Português
