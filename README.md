@@ -11,7 +11,7 @@
 
 ## 📸 Preview / Visualização
 
-![Dashboard Preview](assets/preview.png)
+[Dashboard Preview]
 <img width="1399" height="584" alt="image" src="https://github.com/user-attachments/assets/9309db7b-9a62-44f0-ae9a-9715be23d263" />
 *(Screenshot of the generated HTML report / Captura de tela do relatório gerado)*
 
