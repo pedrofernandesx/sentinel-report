@@ -12,7 +12,7 @@
 ## 📸 Preview / Visualização
 
 [Dashboard Preview]
-<img width="1399" height="584" alt="image" src="https://github.com/user-attachments/assets/9309db7b-9a62-44f0-ae9a-9715be23d263" />
+<<img width="1138" height="470" alt="image" src="https://github.com/user-attachments/assets/51d5e9a9-af78-463f-b865-eba9fcb0739b" />
 *(Screenshot of the generated HTML report / Captura de tela do relatório gerado)*
 
 ## 💡 UX & Educational Mode / Modo Educativo
