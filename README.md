@@ -17,7 +17,7 @@
 
 ## 💡 UX & Educational Mode / Modo Educativo
 
-![Tooltips Demo](assets/tooltips.png)
+[Tooltips Demo]
 *(Interactive tooltips in action / Tooltips interativos em ação)*
 <img width="1265" height="444" alt="image" src="https://github.com/user-attachments/assets/7e81af27-aefb-4ebb-9c83-2222ce0723e7" />
 
