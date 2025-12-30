@@ -15,8 +15,20 @@
 <img width="1399" height="584" alt="image" src="https://github.com/user-attachments/assets/9309db7b-9a62-44f0-ae9a-9715be23d263" />
 *(Screenshot of the generated HTML report / Captura de tela do relatório gerado)*
 
+## 💡 UX & Educational Mode / Modo Educativo
+
+![Tooltips Demo](assets/tooltips.png)
+*(Interactive tooltips in action / Tooltips interativos em ação)*
+<img width="1265" height="444" alt="image" src="https://github.com/user-attachments/assets/7e81af27-aefb-4ebb-9c83-2222ce0723e7" />
+
+
 ---
 ## 🇧🇷 Português
+O painel foi projetado não apenas para exibir dados, mas para **educar**.
+*   **Tooltips Interativos:** Passe o mouse sobre termos técnicos (como *CPU*, *RAM*, *IP Local*) para ver explicações instantâneas e didáticas.
+*   **Aprendizado Contextual:** Ajuda estudantes e usuários a entenderem o que "Portas Abertas" ou "Carga Alta" significam para a segurança do sistema.
+
+
 
 ### ⚡ Sobre o Projeto
 **Sentinel Report** é uma ferramenta de automação em Python desenvolvida para administradores de sistemas e estudantes de cibersegurança. Ela realiza uma varredura rápida na máquina host, coletando telemetria vital (CPU, RAM, Disco) e executando um scan de portas na rede local.
@@ -47,7 +59,11 @@ O resultado é exportado para um **Dashboard HTML com tema Cyberpunk**, apresent
 
 ---
 
+
 ## 🇺🇸 English
+The dashboard was designed not just to display data, but to **educate**.
+*   **Interactive Tooltips:** Hover over technical terms (like *CPU*, *RAM*, *Local IP*) to see instant, beginner-friendly explanations.
+*   **Contextual Learning:** Helps users understand what "Open Ports" or "High Load" actually mean for system security.
 
 ### ⚡ About the Project
 **Sentinel Report** is a Python automation tool designed for sysadmins and cybersecurity enthusiasts. It performs a quick scan of the host machine, collecting vital telemetry (CPU, RAM, Disk usage) and performing a local network port scan.
