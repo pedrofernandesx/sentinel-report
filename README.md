@@ -107,3 +107,6 @@ sentinel-report/
 ├── assets/              # Images and static files
 ├── main.py              # Entry point (Arquivo principal)
 └── requirements.txt     # Dependencies
+
+👨‍💻 Author
+Developed by Pedro Fernandes
