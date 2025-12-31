@@ -9,7 +9,12 @@ def generate_dashboard(ctx: Dict, ports: List[int], lang: str = "EN") -> str:
     t = LANG_TEXT.get(lang, LANG_TEXT["EN"])
 
     def _color(val):
-        return "#10b981" if val < 60 else "#f59e0b" if val < 85 else "#ef4444"
+            """Return severity color based on usage percentage."""
+            return (
+             "#10b981" if val < 40 else
+             "#f59e0b" if val < 65 else 
+            "" "#ef4444"
+        )
 
     c_cpu = _color(ctx['cpu_load'])
     c_ram = _color(ctx['ram_usage'])
