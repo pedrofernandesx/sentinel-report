@@ -7,7 +7,7 @@
 > **Automated System Audit & Network Recon Tool**  
 > *Ferramenta de Auditoria de Sistema e Reconhecimento de Rede*
 
---- 🇧🇷 first, 🇺🇸 bellow
+>--- 🇧🇷 first, 🇺🇸 bellow
 
 ## 📸 Preview / Visualização
 

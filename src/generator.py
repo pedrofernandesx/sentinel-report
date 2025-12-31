@@ -1,193 +1,100 @@
 import os
 from datetime import datetime
+from typing import Dict, List
+# Importamos as configurações do arquivo vizinho
+from config import LANG_TEXT, CSS_STYLE
 
-def create_html_report(sys_data, open_ports):
-    """Gera um Dashboard HTML Cyberpunk com explicações didáticas e barras visuais."""
-    
-    # Lógica de Cores para as Barras de Progresso
-    def get_color(value):
-        if value < 50: return "#00ff41"  # Verde (Safe)
-        if value < 80: return "#fdf500"  # Amarelo (Warning)
-        return "#ff003c"                 # Vermelho (Danger)
+def generate_dashboard(ctx: Dict, ports: List[int], lang: str = "EN") -> str:
+    # Busca o texto no config.py
+    t = LANG_TEXT.get(lang, LANG_TEXT["EN"])
 
-    cpu_color = get_color(sys_data['cpu_uso'])
-    ram_color = get_color(sys_data['memoria_uso'])
-    disk_color = get_color(sys_data['disco_uso'])
+    def _color(val):
+        return "#10b981" if val < 60 else "#f59e0b" if val < 85 else "#ef4444"
 
-    # CSS Injetado 
-    css_style = """
-    <style>
-        :root {
-            --bg-color: #050505;
-            --card-bg: #111;
-            --neon-green: #00ff41;
-            --neon-purple: #9d00ff;
-            --neon-red: #ff003c;
-            --text-main: #e0e0e0;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Consolas', 'Courier New', monospace;
-            margin: 0; padding: 20px;
-            background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
-            background-size: 30px 30px; /* Efeito de Grid no fundo */
-        }
-        .container { max-width: 1000px; margin: 0 auto; }
-        
-        /* CABEÇALHO */
-        header {
-            text-align: center;
-            border-bottom: 2px solid var(--neon-purple);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        h1 { margin: 0; color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); letter-spacing: 3px; }
-        .subtitle { color: var(--neon-purple); font-size: 0.9em; opacity: 0.8; }
+    c_cpu = _color(ctx['cpu_load'])
+    c_ram = _color(ctx['ram_usage'])
+    c_dsk = _color(ctx['disk_usage'])
 
-        /* GRID LAYOUT */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
+    if ports:
+        ports_html = "".join([
+            f"<div style='padding:12px 0; border-bottom:1px solid #334155; display:flex; align-items:center; justify-content:space-between;'>"
+            f"<span class='mono'>PORT {p}</span> <span class='badge open'>{t['open']}</span></div>" 
+            for p in ports
+        ])
+    else:
+        ports_html = f"<div style='padding:15px 0; display:flex; align-items:center; gap:10px;'><span class='badge safe'>{t['sec']}</span> <span style='color:var(--muted); font-size:0.9rem'>{t['clean']}</span></div>"
 
-        /* CARDS */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid #333;
-            border-left: 4px solid var(--neon-purple);
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-        }
-        .card:hover { transform: translateY(-3px); border-left-color: var(--neon-green); }
-        h2 { color: var(--neon-purple); border-bottom: 1px dashed #444; padding-bottom: 10px; margin-top: 0; display: flex; align-items: center; justify-content: space-between; }
-        
-        /* BARRAS DE PROGRESSO */
-        .progress-container {
-            background: #222;
-            height: 10px;
-            width: 100%;
-            border-radius: 5px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        .progress-bar { height: 100%; transition: width 0.5s; }
-        .stat-row { margin-bottom: 15px; }
-        .stat-label { display: flex; justify-content: space-between; font-size: 0.9em; font-weight: bold; }
-
-        /* LISTA DE PORTAS */
-        ul { list-style: none; padding: 0; }
-        li { padding: 8px; border-bottom: 1px solid #222; display: flex; align-items: center; }
-        li::before { content: "►"; color: var(--neon-green); margin-right: 10px; font-size: 0.8em; }
-        .port-open { color: var(--neon-red); font-weight: bold; }
-        .port-safe { color: #888; font-style: italic; }
-
-        /* TOOLTIPS (A Mágica da Explicação) */
-        .tooltip {
-            position: relative;
-            cursor: help;
-            border-bottom: 1px dotted var(--neon-green);
-        }
-        .tooltip::after {
-            content: attr(data-tip);
-            position: absolute;
-            bottom: 125%; left: 50%; transform: translateX(-50%);
-            background: #222; border: 1px solid var(--neon-green);
-            color: #fff; padding: 8px; border-radius: 4px;
-            font-size: 0.8em; width: 220px;
-            visibility: hidden; opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 10; text-align: center;
-            box-shadow: 0 0 10px rgba(0,255,65,0.2);
-        }
-        .tooltip:hover::after { visibility: visible; opacity: 1; }
-
-        footer { text-align: center; margin-top: 40px; color: #555; font-size: 0.8em; }
-    </style>
-    """
-
-    # HTML
-    html_content = f"""
+    # CSS_STYLE import
+    html = f"""
     <!DOCTYPE html>
-    <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <title>SENTINEL REPORT v2.0</title>
-        {css_style}
-    </head>
+    <html lang="{lang.lower()}">
+    <head><meta charset="UTF-8"><title>Sentinel Report</title>{CSS_STYLE}</head>
     <body>
         <div class="container">
             <header>
-                <h1>💀 SENTINEL REPORT</h1>
-                <div class="subtitle">AUDITORIA DE SISTEMA AUTOMATIZADA // {datetime.now().strftime("%d/%m/%Y %H:%M")}</div>
+                <div><h1>Sentinel<span>Report</span></h1><div style="color:var(--muted); font-size:0.9rem">{t['sub']}</div></div>
+                <div class="meta">TARGET: {ctx['hostname']}<br>{datetime.now().strftime('%Y-%m-%d %H:%M')}</div>
             </header>
-            
-            <div class="dashboard">
+            <div class="grid">
                 
-                <!-- CARD 1: IDENTIDADE -->
+                <!-- Identity -->
                 <div class="card">
-                    <h2>🖥️ ALVO <span style="font-size:0.6em; cursor:help" title="Informações básicas de identificação da máquina">?</span></h2>
-                    <p><strong>HOSTNAME:</strong> {sys_data['hostname']}</p>
-                    <p><strong>IP LOCAL:</strong> <span class="tooltip" data-tip="Endereço interno na sua rede local. Não é seu IP público de internet.">{sys_data['ip_local']}</span></p>
-                    <p><strong>SISTEMA:</strong> {sys_data['sistema']}</p>
-                    <p><strong>BOOT:</strong> {sys_data['boot_time']}</p>
+                    <div class="card-head">{t['id']} <div class="tip help-icon" data-msg="{t['id_tip']}">?</div></div>
+                    <div class="metric-row"><div>Hostname</div><div class="mono" style="color:var(--text)">{ctx['hostname']}</div></div>
+                    <div class="metric-row">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span class="interactive-text" data-msg="{t['ip_tip']}">{t['ip']}</span>
+                        </div>
+                        <div class="mono">{ctx['ip_local']}</div>
+                    </div>
+                    <div class="metric-row"><div>OS Build</div><div class="mono" style="color:var(--muted)">{ctx['os_version']}</div></div>
                 </div>
 
-                <!-- CARD 2: RECURSOS (Com Barras Visuais) -->
+                <!-- Resources -->
                 <div class="card">
-                    <h2>⚡ RECURSOS <span style="font-size:0.6em; cursor:help" title="Monitoramento de carga de hardware">?</span></h2>
+                    <div class="card-head">{t['load']} <div class="tip help-icon" data-msg="{t['load_tip']}">?</div></div>
                     
-                    <div class="stat-row">
-                        <div class="stat-label">
-                            <span class="tooltip" data-tip="Processador: O cérebro do PC. Acima de 80% constante pode indicar lentidão ou malware.">CPU</span>
-                            <span style="color:{cpu_color}">{sys_data['cpu_uso']}%</span>
+                    <div class="metric-row">
+                        <div class="metric-label">
+                            <span class="interactive-text" data-msg="{t['cpu_tip']}">CPU</span> 
+                            <span style="color:{c_cpu}">{ctx['cpu_load']}%</span>
                         </div>
-                        <div class="progress-container"><div class="progress-bar" style="width:{sys_data['cpu_uso']}%; background:{cpu_color}"></div></div>
+                        <div class="bar-bg"><div class="bar-fill" style="width:{ctx['cpu_load']}%; background:{c_cpu}"></div></div>
                     </div>
 
-                    <div class="stat-row">
-                        <div class="stat-label">
-                            <span class="tooltip" data-tip="Memória RAM: Onde os programas rodam. Se encher, o PC trava.">RAM</span>
-                            <span style="color:{ram_color}">{sys_data['memoria_uso']}%</span>
+                    <div class="metric-row">
+                        <div class="metric-label">
+                            <span class="interactive-text" data-msg="{t['ram_tip']}">RAM</span> 
+                            <span style="color:{c_ram}">{ctx['ram_usage']}%</span>
                         </div>
-                        <div class="progress-container"><div class="progress-bar" style="width:{sys_data['memoria_uso']}%; background:{ram_color}"></div></div>
-                        <small style="color:#666">Total: {sys_data['memoria_total']}</small>
+                        <div class="bar-bg"><div class="bar-fill" style="width:{ctx['ram_usage']}%; background:{c_ram}"></div></div>
                     </div>
 
-                    <div class="stat-row">
-                        <div class="stat-label">
-                            <span class="tooltip" data-tip="Armazenamento principal.">DISCO (C:)</span>
-                            <span style="color:{disk_color}">{sys_data['disco_uso']}%</span>
+                    <div class="metric-row">
+                        <div class="metric-label">
+                            <span class="interactive-text" data-msg="{t['disk_tip']}">DISK</span> 
+                            <span style="color:{c_dsk}">{ctx['disk_usage']}%</span>
                         </div>
-                        <div class="progress-container"><div class="progress-bar" style="width:{sys_data['disco_uso']}%; background:{disk_color}"></div></div>
+                        <div class="bar-bg"><div class="bar-fill" style="width:{ctx['disk_usage']}%; background:{c_dsk}"></div></div>
                     </div>
                 </div>
 
-                <!-- CARD 3: REDE -->
+                <!-- Attack Surface -->
                 <div class="card">
-                    <h2>🌐 REDE & SEGURANÇA <span style="font-size:0.6em; cursor:help" title="Pontos de entrada potenciais para invasores">?</span></h2>
-                    <p style="font-size:0.9em; color:#aaa; margin-bottom:15px;">
-                        Portas são "portões" digitais. Portas abertas desnecessárias são riscos de segurança.
-                    </p>
-                    <ul>
-                        {''.join([f"<li><span class='port-open'>🔓 PORTA {p} ABERTA</span> <span class='tooltip' data-tip='Serviço comum rodando nesta porta. Verifique se você realmente precisa dele.'>[?]</span></li>" for p in open_ports]) or "<li class='port-safe'>🔒 Nenhuma porta crítica detectada no scan rápido.</li>"}
-                    </ul>
+                    <div class="card-head">{t['atk']} <div class="tip help-icon" data-msg="{t['atk_tip']}">?</div></div>
+                    {ports_html}
                 </div>
-
-            </div> <!-- Fim Dashboard -->
-
-            <footer>
-                SENTINEL SYSTEM v2.0 | GERADO POR PYTHON | SECURITY BY DESIGN
-            </footer>
+            </div>
+            <footer>{t['footer']}</footer>
         </div>
     </body>
     </html>
     """
+
+    out_dir = "output"
+    if not os.path.exists(out_dir): os.makedirs(out_dir)
+    path = os.path.join(out_dir, f"sentinel_report_{lang.lower()}.html")
     
-    output_path = os.path.join("output", "relatorio_sentinel.html")
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
-    
-    return output_path
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html)
+    return os.path.abspath(path)

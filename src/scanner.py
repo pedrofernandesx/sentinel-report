@@ -2,46 +2,43 @@ import socket
 import platform
 import psutil
 import datetime
+from typing import Dict, List, Any
 
-def get_system_info():
-    """Coleta informações vitais do sistema operacional e hardware."""
-    try:
-        info = {
-            "sistema": f"{platform.system()} {platform.release()}",
-            "hostname": socket.gethostname(),
-            "ip_local": get_local_ip(),
-            "cpu_uso": psutil.cpu_percent(interval=1),
-            "memoria_total": f"{round(psutil.virtual_memory().total / (1024**3), 2)} GB",
-            "memoria_uso": psutil.virtual_memory().percent,
-            "disco_uso": psutil.disk_usage('/').percent,
-            "boot_time": datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
-        }
-        return info
-    except Exception as e:
-        return {"erro": str(e)}
+def get_host_telemetry() -> Dict[str, Any]:
+    boot_ts = psutil.boot_time()
+    
+    return {
+        "hostname": socket.gethostname(),
+        "ip_local": _get_lhost(),
+        "os_version": f"{platform.system()} {platform.release()}",
+        "boot_time": datetime.datetime.fromtimestamp(boot_ts).strftime("%Y-%m-%d %H:%M:%S"),
+        "cpu_load": psutil.cpu_percent(interval=1),
+        "ram_usage": psutil.virtual_memory().percent,
+        "ram_total": f"{round(psutil.virtual_memory().total / (1024**3), 2)} GB",
+        "disk_usage": psutil.disk_usage('/').percent
+    }
 
-def get_local_ip():
-    """Pega o IP local de forma robusta (evita retornar 127.0.0.1 sempre)."""
+def _get_lhost() -> str:
+    # UDP connect trick to get the real interface IP without sending data
+    # Truque de conexão UDP para obter o IP real da interface sem enviar dados
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80)) # Tenta conectar no Google (sem enviar dados)
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("1.1.1.1", 80))
+            return s.getsockname()[0]
+    except Exception:
         return "127.0.0.1"
 
-def scan_ports(target_ip, ports=[21, 22, 80, 443, 3306, 8080]):
-    """Verifica quais portas da lista estão abertas no alvo."""
+def scan_ports(target: str, ports: List[int] = None) -> List[int]:
+    # Common attack vectors
+    if not ports:
+        ports = [21, 22, 23, 80, 443, 3306, 3389, 5432, 8080]
+    
     open_ports = []
-    # Timeout baixo pra ser rápido (mas pode perder precisão em redes lentas)
-    socket.setdefaulttimeout(0.5) 
+    socket.setdefaulttimeout(0.3) # Aggressive timeout for LAN speed
     
     for port in ports:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = s.connect_ex((target_ip, port)) # Retorna 0 se sucesso
-        if result == 0:
-            open_ports.append(port)
-        s.close()
-    
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex((target, port)) == 0:
+                open_ports.append(port)
+                
     return open_ports
